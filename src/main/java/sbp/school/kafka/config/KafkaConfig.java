@@ -5,10 +5,10 @@ import java.util.Properties;
 public class KafkaConfig {
 
     public static Properties getKafkaProperties() {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        return props;
+        Properties properties = new Properties();
+        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        properties.put("value.serializer", "sbp.school.kafka.serializer.OperationSerializer");
+        return properties;
     }
 }
