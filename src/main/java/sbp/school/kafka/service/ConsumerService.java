@@ -22,7 +22,7 @@ public class ConsumerService {
 
             ConsumerRecords<String, Operation> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(100L));
             for (ConsumerRecord<String, Operation> consumerRecord : consumerRecords) {
-                System.out.printf("Topic: %s Partition: %s Offset: %s Value: %s",
+                System.out.printf("Topic: %s Partition: %s Offset: %s Value: %s \n",
                         consumerRecord.topic(),
                         consumerRecord.partition(),
                         consumerRecord.offset(),
