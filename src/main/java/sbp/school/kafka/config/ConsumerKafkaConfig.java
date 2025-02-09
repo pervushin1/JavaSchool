@@ -12,6 +12,8 @@ public class ConsumerKafkaConfig {
         properties.put("value.deserializer", valueDeserializer);
         properties.put("group.id", "kafka-consumer");
         properties.put("enable.auto.commit", "false");
+        properties.put("fetch.min.bytes", "10");
+
     }
 
     public Properties getProperties() {

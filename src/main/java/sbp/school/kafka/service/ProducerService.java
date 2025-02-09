@@ -11,7 +11,7 @@ import static sbp.school.kafka.serializer.SerializerType.STRING;
 
 public class ProducerService {
 
-    private final String MAIN_TOPIC = "test-topic";
+    private final String MAIN_TOPIC = "main_topic";
 
     private final String CONFIRMATION_TOPIC = "confirmation_topic";
 

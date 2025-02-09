@@ -19,7 +19,7 @@ public class ConsumerService {
         kafkaConsumer.subscribe(topics);
 
         while (true) {
-            ConsumerRecords<String, Operation> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(100L));
+            ConsumerRecords<String, Operation> consumerRecords = kafkaConsumer.poll(Duration.ofSeconds(10));
             for (ConsumerRecord<String, Operation> consumerRecord : consumerRecords) {
                 System.out.printf("Consumer: %s, %s, Status: %s \n",
                         consumerRecord.topic(),

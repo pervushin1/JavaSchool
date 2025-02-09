@@ -10,8 +10,9 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static sbp.school.kafka.deserializer.DeserializerType.STRING;
 
@@ -25,27 +26,26 @@ public class Main {
 
     private static final OperationRepository operationRepository = new OperationRepository();
 
-    private static final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
 
     public static void main(String[] args) {
 
-        executorService.submit(() -> consumerService.listen(List.of("confirmation_topic"), STRING.getValue(), chekerService));
+        new Thread(() -> consumerService.listen(List.of("confirmation_topic"), STRING.getValue(), chekerService)).start();
 
-        Operation operation1 = Operation.builder()
-                .id(UUID.randomUUID().toString())
-                .account("40754122585482")
-                .date(LocalDate.of(2024, Month.JANUARY, 1))
-                .type("openAccount")
-                .value("0")
-                .build();
+        new Thread(chekerService::showTheMap).start();
 
-        Operation operation2 = Operation.builder()
-                .id(UUID.randomUUID().toString())
-                .account("6545423156574")
-                .date(LocalDate.of(2024, Month.JANUARY, 1))
-                .type("depositAccount")
-                .value("500000")
-                .build();
+        scheduler.scheduleWithFixedDelay(() -> chekerService.retrySend(operationRepository), 20, 10, TimeUnit.SECONDS);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Operation operation1 = Operation.builder().id(UUID.randomUUID().toString()).account("40754122585482").date(LocalDate.of(2024, Month.JANUARY, 1)).type("openAccount").value("0").build();
+
+        Operation operation2 = Operation.builder().id(UUID.randomUUID().toString()).account("6545423156574").date(LocalDate.of(2024, Month.JANUARY, 1)).type("depositAccount").value("500000").build();
 
         operationRepository.save(operation1);
         operationRepository.save(operation2);
@@ -61,6 +61,22 @@ public class Main {
         String producerID2 = producerService.sendConfirmation(operation2, send2);
 
         chekerService.getMap().put(producerID2, "null");
+
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        chekerService.getMap().remove(producerID1);
+        chekerService.getMap().put(producerID1, "null");
+        System.out.println("value removed");
+
+        try {
+            Thread.sleep(20000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
 
     }
