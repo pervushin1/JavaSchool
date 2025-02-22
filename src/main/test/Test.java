@@ -31,9 +31,9 @@ public class Test {
 
         new Thread(() -> consumerService.listen(List.of("confirmation_topic"), STRING.getValue(), chekerService)).start();
 
-        new Thread(chekerService::showTheMap).start();
+        new Thread(() -> chekerService.showTheMap(consumerService, producerService)).start();
 
-        scheduler.scheduleWithFixedDelay(() -> chekerService.retrySend(operationRepository), 0, 1, TimeUnit.SECONDS);
+        scheduler.scheduleWithFixedDelay(() -> chekerService.retrySend(consumerService, producerService), 0, 30, TimeUnit.SECONDS);
 
         try {
             Thread.sleep(1000);
@@ -52,26 +52,23 @@ public class Test {
 
         String producerID1 = producerService.sendConfirmation(operation1, send1);
 
-        chekerService.getMap().put(producerID1, "null");
-
         boolean send2 = producerService.send(operation2);
 
         String producerID2 = producerService.sendConfirmation(operation2, send2);
 
-        chekerService.getMap().put(producerID2, "null");
 
         try {
-            Thread.sleep(60000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
-        chekerService.getMap().remove(producerID1);
-        chekerService.getMap().put(producerID1, "null");
+        consumerService.getConsumerMap().remove(producerID1);
+        consumerService.getConsumerMap().put(producerID1, "null");
         System.out.println("value removed");
 
         try {
-            Thread.sleep(20000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

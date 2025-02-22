@@ -1,5 +1,6 @@
 package sbp.school.kafka.service;
 
+import lombok.Getter;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -8,9 +9,12 @@ import sbp.school.kafka.model.Operation;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
+@Getter
 public class ConsumerService {
 
+    public ConcurrentHashMap<String, String> consumerMap = new ConcurrentHashMap<>();
 
     public void listen(List<String> topics, String deserializer, ChekerService chekerService) {
         ConsumerKafkaConfig kafkaConfig = new ConsumerKafkaConfig(deserializer);
@@ -25,10 +29,10 @@ public class ConsumerService {
                         consumerRecord.topic(),
                         consumerRecord.key(),
                         consumerRecord.value());
-                if (chekerService.map.containsKey(consumerRecord.key())) {
-                    chekerService.map.put(consumerRecord.key(), consumerRecord.key());
+                if (consumerMap.containsKey(consumerRecord.key())) {
+                    consumerMap.put(consumerRecord.key(), consumerRecord.key());
                 } else {
-                    chekerService.map.put("null", consumerRecord.key());
+                    consumerMap.put("null", consumerRecord.key());
                 }
             }
             try {

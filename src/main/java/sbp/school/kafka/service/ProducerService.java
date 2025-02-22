@@ -4,6 +4,12 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import sbp.school.kafka.config.ProducerKafkaConfig;
 import sbp.school.kafka.model.Operation;
+import sbp.school.kafka.model.Transaction;
+import sbp.school.kafka.repository.OperationRepository;
+import sbp.school.kafka.repository.TransactionRepository;
+
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static sbp.school.kafka.serializer.SerializerType.OPERATION;
 import static sbp.school.kafka.serializer.SerializerType.STRING;
@@ -16,6 +22,14 @@ public class ProducerService {
     private final String CONFIRMATION_TOPIC = "confirmation_topic";
 
     private ProducerKafkaConfig kafkaConfig;
+
+    public ConcurrentHashMap<Integer, String> producerMap = new ConcurrentHashMap<>();
+
+    private TransactionRepository transactionRepository = new TransactionRepository();
+
+    private OperationRepository operationRepository = new OperationRepository();
+
+    private int i = 0;
 
 
     public boolean send(Operation operation) {
@@ -31,6 +45,8 @@ public class ProducerService {
             });
             producer.flush();
             isSuccess = true;
+            producerMap.put(i++, operation.getId());
+            transactionRepository.saveTransaction(operation);
             return isSuccess;
         } catch (Exception e) {
             return isSuccess;
@@ -52,6 +68,15 @@ public class ProducerService {
             });
             producer.flush();
         }
+
         return confirmationKey;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactionRepository.getTransactions();
+    }
+
+    public Operation getOperationByTransaction(Transaction transaction) {
+        return operationRepository.get(transaction.getOperationId());
     }
 }
